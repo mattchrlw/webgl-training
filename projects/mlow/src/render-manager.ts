@@ -1,7 +1,8 @@
 export class RenderManager {
   public gl: WebGL2RenderingContext;
   public canvas: HTMLCanvasElement;
-  public alpha: number;
+
+  private onRenderCallbacks: (() => void)[] = [];
 
   constructor(canvas: Element | null) {
     if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
@@ -15,7 +16,10 @@ export class RenderManager {
 
     this.canvas = canvas;
     this.gl = gl;
-    this.alpha = 0;
+  }
+
+  public onRender(callback: () => void) {
+    this.onRenderCallbacks.push(callback);
   }
 
   public startRender() {
@@ -30,12 +34,12 @@ export class RenderManager {
     this.canvas.height = height;
     this.gl.viewport(0, 0, width, height);
 
-    this.alpha = (this.alpha + 0.01) % 1;
-
-    console.log(this.alpha);
-
-    this.gl.clearColor(0, 0, 0, this.alpha);
+    this.gl.clearColor(0, 0, Math.sin(performance.now() * 0.005 + Math.PI) / 2 + 0.5, 1);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+
+    for (const callback of this.onRenderCallbacks) {
+      callback();
+    }
 
     requestAnimationFrame(this.render);
   }
