@@ -6,24 +6,21 @@ import { Program } from './program';
 
 import vertexShaderSource from './shaders/vertex-shader.glsl?raw';
 import fragmentShaderSource from './shaders/fragment-shader.glsl?raw';
+import { Camera } from './camera';
+import { TriangleObject } from './triangle-object';
 
 function main() {
   const canvas = document.querySelector('#webgl-canvas')
   const renderManager = new RenderManager(canvas);
-
-  const vertices = [
-    vec3.fromValues(0, 0.5, 0),
-    vec3.fromValues(-0.5, -0.5, 0),
-    vec3.fromValues(0.5, -0.5, 0)
-  ]
-
-  const triangle = new Mesh(renderManager.gl, vertices);
-  const program = new Program(renderManager.gl, vertexShaderSource, fragmentShaderSource);
-  const colourUniform = program.getUniformLocation('uColour');
+  const camera = new Camera(renderManager.canvas);
+  const triangle = new TriangleObject(renderManager.gl, camera);
 
   renderManager.onRender(() => {
-    program.setUniform3f(colourUniform, vec3.fromValues(Math.sin(performance.now() * 0.005) / 2 + 0.5, 0, 0))
-    triangle.render(program, 'aPosition');
+    camera.zoom = 0.5;
+    camera.position[0] = Math.sin(performance.now() * 0.001);
+    camera.position[1] = Math.cos(performance.now() * 0.001);
+    
+    triangle.render();
   });
 
   renderManager.startRender();
