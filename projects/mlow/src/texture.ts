@@ -49,8 +49,8 @@ export class Texture {
     this.gl.texImage2D(
       this.gl.TEXTURE_2D, // target: The type of texture we're working with
       0, // level: Mipmap level (0 is base level)
-      this.gl.RGBA, // internalFormat: How WebGL should store the data
-      this.gl.RGBA, // format: Format of the data we're providing
+      this.gl.LUMINANCE, // internalFormat: How WebGL should store the data
+      this.gl.LUMINANCE, // format: Format of the data we're providing
       this.gl.UNSIGNED_BYTE, // type: Data type of the pixel data
       image // source: The image data
     );

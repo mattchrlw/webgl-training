@@ -10,8 +10,8 @@ function main() {
 
   renderManager.onRender(() => {
     camera.zoom = 1;
-    camera.position[0] = Math.sin(performance.now() * 0.0002);
-    camera.position[1] = Math.cos(performance.now() * 0.0002);
+    camera.position[0] = Math.sin(performance.now() * 0.002);
+    camera.position[1] = Math.cos(performance.now() * 0.001);
     
     triangle.render();
   });

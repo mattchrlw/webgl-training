@@ -28,8 +28,8 @@ export class Mesh {
       vertexData[i * COMPONENTS_PER_VERTEX + 1] = vertices[i].position[1];
       vertexData[i * COMPONENTS_PER_VERTEX + 2] = vertices[i].position[2];
 
-      vertexData[i * COMPONENTS_PER_VERTEX + 3] = vertices[i].uv[0]; // u
-      vertexData[i * COMPONENTS_PER_VERTEX + 4] = vertices[i].uv[1]; // v
+      vertexData[i * COMPONENTS_PER_VERTEX + 3] = vertices[i].uv[0] / 8; // u
+      vertexData[i * COMPONENTS_PER_VERTEX + 4] = vertices[i].uv[1] / 8; // v
     }
 
     // either STATIC_DRAW or DYNAMIC_DRAW. Basically saying, do you intend to change this?

@@ -34,7 +34,9 @@ export class RenderManager {
     this.canvas.height = height;
     this.gl.viewport(0, 0, width, height);
 
-    this.gl.clearColor(0, 0, Math.sin(performance.now() * 0.005 + Math.PI) / 2 + 0.5, 1);
+    const lum = Math.sin(performance.now() * 0.005 + Math.PI) / 2 + 0.5;
+
+    this.gl.clearColor(lum, lum, lum, 1);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
     for (const callback of this.onRenderCallbacks) {

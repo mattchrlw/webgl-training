@@ -19,5 +19,5 @@ void main() {
 
   // Output the vertex position multiplied by uViewProjectionMatrix
   // gl_Position is a built-in variable that holds the final output position
-  gl_Position = uViewProjectionMatrix * vec4(aPosition, 1.0);
+  gl_Position = uViewProjectionMatrix * vec4(aPosition, 1);
 }
