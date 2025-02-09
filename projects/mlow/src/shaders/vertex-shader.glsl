@@ -7,12 +7,15 @@ uniform mat4 uViewProjectionMatrix;
 // The position of the vertex being processed
 in vec3 aPosition;
 
-// The position of the vertex, output to the fragment shader
-out vec3 vPosition;
+// The texture coordinates of the vertex being processed
+in vec2 aUv;
+
+// The texture coordinates of the vertex, output to the fragment shader
+out vec2 vUv;
 
 void main() {
-  // Pass the vertex position to the fragment shader
-  vPosition = aPosition;
+  // Pass the vertex texture coordinates to the fragment shader
+  vUv = aUv;
 
   // Output the vertex position multiplied by uViewProjectionMatrix
   // gl_Position is a built-in variable that holds the final output position

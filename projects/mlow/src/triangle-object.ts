@@ -1,11 +1,13 @@
-import { vec3 } from 'gl-matrix';
+import { vec2, vec3 } from 'gl-matrix';
 
 import { Camera } from './camera';
 import { Mesh } from './mesh';
 import { Program } from './program';
+import { Texture } from './texture';
 
 import vertexShaderSource from './shaders/vertex-shader.glsl?raw';
 import fragmentShaderSource from './shaders/fragment-shader.glsl?raw';
+import textureUrl from './assets/test-texture.png?url';
 
 /**
  * Represents our triangle object, containing all the logic needed to render it.
@@ -21,11 +23,15 @@ export class TriangleObject {
    */
   private program: Program;
 
+  /**
+   * The texture that will be applied to the triangle, or `null` if it hasn't
+   * loaded yet.
+   */
+  private texture: Texture | null = null;
+
   // Uniform variables that we'll use
   private viewProjectionMatrixUniform: WebGLUniformLocation | null;
-  private colour1Uniform: WebGLUniformLocation | null;
-  private colour2Uniform: WebGLUniformLocation | null;
-  private timeUniform: WebGLUniformLocation | null;
+  private textureUniform: WebGLUniformLocation | null;
 
   /**
    * Creates a new instance of our Triangle, which will render a simple triangle to the
@@ -57,11 +63,11 @@ export class TriangleObject {
 
     this.mesh = new Mesh(this.gl, [
       // Top of the triangle
-      vec3.fromValues(0, rand, 0),
+      {position: vec3.fromValues(0, rand, 0), uv: vec2.fromValues(0.5, 1.0)},
       // Bottom left of the triangle
-      vec3.fromValues(-rand, -rand, 0),
+      {position: vec3.fromValues(-rand, -rand, 0), uv: vec2.fromValues(0.0, 0.0)},
       // Bottom right of the triangle
-      vec3.fromValues(rand, -rand, 0),
+      {position: vec3.fromValues(rand, -rand, 0), uv: vec2.fromValues(1.0, 0.0)}
     ]);
 
     // Create a program that we'll use to render the triangle
@@ -69,9 +75,11 @@ export class TriangleObject {
     this.viewProjectionMatrixUniform = this.program.getUniformLocation(
       'uViewProjectionMatrix'
     );
-    this.colour1Uniform = this.program.getUniformLocation('uColour1');
-    this.colour2Uniform = this.program.getUniformLocation('uColour2');
-    this.timeUniform = this.program.getUniformLocation('uTime');
+    this.textureUniform = this.program.getUniformLocation('uTexture');
+
+    Texture.fromURL(gl, textureUrl).then((texture) => {
+      this.texture = texture;
+    });
   }
 
   /**
@@ -84,24 +92,18 @@ export class TriangleObject {
       this.camera.getViewProjectionMatrix()
     );
 
-    // Set the colour of the triangle
-    this.program.setUniform3f(
-      this.colour1Uniform,
-      vec3.fromValues(1, 0.18, 0.569)
-    );
-    this.program.setUniform3f(
-      this.colour2Uniform,
-      vec3.fromValues(1, 0.753, 0.18)
-    );
+    // Specify which texture unit to use
+    const textureUnit = 0;
+    this.program.setUniform1i(this.textureUniform, textureUnit);
 
-    // Set the time uniform
-    this.program.setUniform1f(
-      this.timeUniform,
-      performance.now() / 1000 // Convert to seconds
-    );
+    // If the texture has loaded, bind it to the texture unit
+    if (this.texture) {
+      this.texture.bind(textureUnit);
+    }
 
     // Render the triangle, using 'aPosition' as the attribute that will receive
-    // the vertex positions
-    this.mesh.render(this.program, 'aPosition');
+    // the vertex positions and 'aUv' as the attribute that will receive the UV
+    // coordinates.
+    this.mesh.render(this.program, 'aPosition', 'aUv');
   }
 }

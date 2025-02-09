@@ -1,11 +1,4 @@
-import { vec3 } from 'gl-matrix';
-
 import { RenderManager } from "./render-manager";
-import { Mesh } from './mesh';
-import { Program } from './program';
-
-import vertexShaderSource from './shaders/vertex-shader.glsl?raw';
-import fragmentShaderSource from './shaders/fragment-shader.glsl?raw';
 import { Camera } from './camera';
 import { TriangleObject } from './triangle-object';
 
@@ -16,9 +9,9 @@ function main() {
   const triangle = new TriangleObject(renderManager.gl, camera);
 
   renderManager.onRender(() => {
-    camera.zoom = 0.5;
-    camera.position[0] = Math.sin(performance.now() * 0.001);
-    camera.position[1] = Math.cos(performance.now() * 0.001);
+    camera.zoom = 1;
+    camera.position[0] = Math.sin(performance.now() * 0.0002);
+    camera.position[1] = Math.cos(performance.now() * 0.0002);
     
     triangle.render();
   });
