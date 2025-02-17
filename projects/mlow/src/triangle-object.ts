@@ -8,6 +8,7 @@ import { Texture } from './texture';
 import vertexShaderSource from './shaders/vertex-shader.glsl?raw';
 import fragmentShaderSource from './shaders/fragment-shader.glsl?raw';
 import textureUrl from './assets/test-texture.png?url';
+import noiseTextureUrl from './assets/noise-texture.png?url';
 
 /**
  * Represents our triangle object, containing all the logic needed to render it.
@@ -29,9 +30,17 @@ export class TriangleObject {
    */
   private texture: Texture | null = null;
 
+  /**
+   * The additional 'noise' texture that will be applied to the triangle, or
+   * `null` if it hasn't loaded yet.
+   */
+  private noiseTexture: Texture | null = null;
+
   // Uniform variables that we'll use
   private viewProjectionMatrixUniform: WebGLUniformLocation | null;
+  private timeUniform: WebGLUniformLocation | null;
   private textureUniform: WebGLUniformLocation | null;
+  private noiseTextureUniform: WebGLUniformLocation | null;
 
   /**
    * Creates a new instance of our Triangle, which will render a simple triangle to the
@@ -76,9 +85,37 @@ export class TriangleObject {
       'uViewProjectionMatrix'
     );
     this.textureUniform = this.program.getUniformLocation('uTexture');
+    this.timeUniform = this.program.getUniformLocation('uTime');
+    this.noiseTextureUniform = this.program.getUniformLocation('uNoiseTexture');
 
-    Texture.fromURL(gl, textureUrl).then((texture) => {
+    Texture.fromURL(
+      gl,
+      textureUrl,
+      // Options to control how the texture is sampled
+      {
+        // When we need to upscale the texture, use the nearest pixel value. This
+        // creates a 'pixelated' effect.
+        magFilter: gl.NEAREST,
+      }
+    ).then((texture) => {
       this.texture = texture;
+    });
+
+    // Load the noise texture for the triangle
+    Texture.fromURL(
+      gl,
+      noiseTextureUrl,
+      // Options to control how the texture is sampled
+      {
+        // When we sample outside the texture's bounds in the horizontal (U)
+        // direction, wrap the texture around (repeat it)
+        wrapU: gl.REPEAT,
+        // When we sample outside the texture's bounds in the vertical (V)
+        // direction, wrap the texture around (repeat it)
+        wrapV: gl.REPEAT,
+      }
+    ).then((texture) => {
+      this.noiseTexture = texture;
     });
   }
 
@@ -92,18 +129,32 @@ export class TriangleObject {
       this.camera.getViewProjectionMatrix()
     );
 
-    // Specify which texture unit to use
-    const textureUnit = 0;
-    this.program.setUniform1i(this.textureUniform, textureUnit);
+    // Set the time uniform
+    this.program.setUniform1f(
+      this.timeUniform,
+      performance.now() / 1000 // Convert to seconds
+    );
 
-    // If the texture has loaded, bind it to the texture unit
+    // Bind the colour texture to texture unit 0
+    let textureUnit = 0;
+    this.program.setUniform1i(this.textureUniform, textureUnit);
     if (this.texture) {
       this.texture.bind(textureUnit);
+    }
+
+    // Bind the noise texture to texture unit 1
+    textureUnit++;
+    this.program.setUniform1i(this.noiseTextureUniform, textureUnit);
+    if (this.noiseTexture) {
+      this.noiseTexture.bind(textureUnit);
     }
 
     // Render the triangle, using 'aPosition' as the attribute that will receive
     // the vertex positions and 'aUv' as the attribute that will receive the UV
     // coordinates.
     this.mesh.render(this.program, 'aPosition', 'aUv');
+
+    // Unbind textures after rendering
+    Texture.unbindAll(this.gl, textureUnit);
   }
 }
