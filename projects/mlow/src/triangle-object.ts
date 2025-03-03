@@ -77,7 +77,26 @@ export class TriangleObject {
       {position: vec3.fromValues(-rand, -rand, 0), uv: vec2.fromValues(0.0, 0.0)},
       // Bottom right of the triangle
       {position: vec3.fromValues(rand, -rand, 0), uv: vec2.fromValues(1.0, 0.0)}
+    ], [
+      {name: 'iOffset', size: 2}
     ]);
+
+    this.mesh.setInstanceCount(3);
+    this.mesh.setInstanceProperty(
+      0,
+      'iOffset',
+      vec2.fromValues(0, 0) as Float32Array,
+    );
+    this.mesh.setInstanceProperty(
+      1,
+      'iOffset',
+      vec2.fromValues(2, 2) as Float32Array,
+    );
+    this.mesh.setInstanceProperty(
+      2,
+      'iOffset',
+      vec2.fromValues(-2, -2) as Float32Array,
+    );
 
     // Create a program that we'll use to render the triangle
     this.program = new Program(gl, vertexShaderSource, fragmentShaderSource);

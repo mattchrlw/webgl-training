@@ -28,5 +28,5 @@ void main() {
     vUv.xy * noiseTextCoordScale + noiseTexCoordOffset
   ).r;
 
-  fragColour = vec4(colour * noise, 1.0);
+  fragColour = vec4((1.0 * colour) * (1.0 - noise), 1.0);
 }
